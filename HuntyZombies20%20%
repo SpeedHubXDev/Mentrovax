@@ -1,0 +1,103 @@
+--// Mentrovax Minimal GUI (Delta Safe)
+-- Parents into CoreGui, simple + clean, no extras
+
+local CoreGui = game:GetService("CoreGui")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+-- cleanup old gui
+local old = CoreGui:FindFirstChild("MentrovaxGui")
+if old then old:Destroy() end
+
+-- codes list
+local codes = {
+    "10KLIKES",
+    "20KLIKES",
+    "30KLIKES",
+    "40KLIKES",
+    "50KLIKES",
+    "10KEVENT",
+    "100KMEMBERS",
+    "Sorryhaha",
+    "Release",
+    "Release2",
+}
+
+-- make gui
+local gui = Instance.new("ScreenGui", CoreGui)
+gui.Name = "MentrovaxGui"
+
+local frame = Instance.new("Frame", gui)
+frame.Size = UDim2.fromOffset(220, 140)
+frame.Position = UDim2.new(0.5, -110, 0.5, -70)
+frame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+frame.BorderSizePixel = 0
+Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 8)
+
+local title = Instance.new("TextLabel", frame)
+title.Size = UDim2.new(1, -35, 0, 30)
+title.Position = UDim2.new(0, 10, 0, 5)
+title.BackgroundTransparency = 1
+title.Font = Enum.Font.GothamBold
+title.TextSize = 18
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.Text = "Mentrovax GUI"
+
+local close = Instance.new("TextButton", frame)
+close.Size = UDim2.fromOffset(25, 25)
+close.Position = UDim2.new(1, -30, 0, 5)
+close.BackgroundTransparency = 1
+close.Font = Enum.Font.GothamBold
+close.TextSize = 20
+close.Text = "X"
+close.TextColor3 = Color3.fromRGB(255, 80, 80)
+
+local button = Instance.new("TextButton", frame)
+button.Size = UDim2.fromOffset(180, 40)
+button.Position = UDim2.new(0.5, -90, 0.5, -10)
+button.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+button.Font = Enum.Font.GothamBold
+button.TextSize = 16
+button.TextColor3 = Color3.fromRGB(255, 255, 255)
+button.Text = "Claim + Redeem"
+Instance.new("UICorner", button).CornerRadius = UDim.new(0, 6)
+
+local status = Instance.new("TextLabel", frame)
+status.Size = UDim2.new(1, -20, 0, 20)
+status.Position = UDim2.new(0, 10, 1, -25)
+status.BackgroundTransparency = 1
+status.Font = Enum.Font.Gotham
+status.TextSize = 14
+status.TextColor3 = Color3.fromRGB(200, 200, 200)
+status.Text = "Ready."
+
+-- close button
+close.MouseButton1Click:Connect(function()
+    gui:Destroy()
+end)
+
+-- claim + redeem
+button.MouseButton1Click:Connect(function()
+    status.Text = "Claiming daily..."
+    local packets = ReplicatedStorage:WaitForChild("Packets", 5)
+    if not packets then
+        status.Text = "Packets not found!"
+        return
+    end
+
+    local daily = packets:FindFirstChild("RequestDailyReward")
+    local redeem = packets:FindFirstChild("RedeemCode")
+
+    if daily then
+        pcall(function() daily:InvokeServer() end)
+    end
+
+    if redeem then
+        for i, code in ipairs(codes) do
+            status.Text = "Redeeming: " .. code
+            pcall(function() redeem:InvokeServer(code) end)
+            task.wait(0.1)
+        end
+    end
+
+    status.Text = "All done ✔"
+end)
